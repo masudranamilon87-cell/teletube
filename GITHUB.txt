@@ -1,0 +1,13 @@
+GitHub Desktop - use THIS folder: C:\Users\Admin\Desktop\teletube-new
+
+1. File > New repository
+2. Name: teletube
+3. Local path: C:\Users\Admin\Desktop\teletube-new
+4. UNCHECK "Initialize with README"
+5. Create repository
+6. Summary: First upload TeleTube
+7. Commit to main
+8. Publish repository (private OK)
+9. Push origin
+
+Do NOT add: node_modules, .next, .env files

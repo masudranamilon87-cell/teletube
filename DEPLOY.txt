@@ -1,0 +1,15 @@
+﻿TeleTube â€” copy ALL files in this folder to your GitHub repo ROOT (not inside a subfolder).
+
+Railway:
+  1. Push this folder to GitHub (private repo OK). Do NOT upload node_modules or .next
+  2. Railway connects to repo â€” Root Directory: empty
+  3. Builder: Dockerfile (auto if Dockerfile exists)
+  4. Variables: TELEGRAM_BOT_TOKEN, ADMIN_PASSWORD, JWT_SECRET,
+     NEXT_PUBLIC_SITE_URL=https://YOUR-APP.up.railway.app,
+     SQLITE_DATABASE_PATH=./data/teletube.sqlite, ADMIN_USERNAME=Masudadmin
+  5. Volume: mount /app/data (keeps SQLite database)
+  6. Redeploy after changing Variables
+
+BotFather: Mini App URL = your Railway HTTPS URL (no trailing slash).
+
+Do NOT commit: .env, .env.local, data/*.sqlite, node_modules, .next

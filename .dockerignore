@@ -1,0 +1,16 @@
+node_modules
+.next
+out
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+data/*.sqlite
+data/*.txt
+data/*.json
+build
+README.md
+*.md
+.cursor
+.vscode

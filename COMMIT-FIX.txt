@@ -1,0 +1,43 @@
+COMMIT NOT WORKING? READ THIS (Bangla + English)
+
+=== PROBLEM 1: Wrong folder (teletube-new has NO .git) ===
+If you use teletube-new, you MUST create repo first:
+
+  GitHub Desktop > File > New repository
+  Name: teletube
+  Path: C:\Users\Admin\Desktop\teletube-new
+  UNCHECK "Initialize this repository with a README"
+  Click Create repository
+
+Then you will see 120+ files in Changes tab.
+
+=== PROBLEM 2: Summary box empty ===
+Bottom left: type ANY text in Summary, example:
+  First upload
+
+Without Summary, Commit button stays GREY (disabled).
+
+=== PROBLEM 3: Git name/email missing ===
+  File > Options > Git
+  Name: Masud
+  Email: (your GitHub email from github.com/settings/emails)
+  Save
+
+=== PROBLEM 4: No files in Changes (0 files) ===
+  Repository > Show in Explorer
+  Must see: src, package.json, Dockerfile inside folder
+  If empty: copy from C:\Users\Admin\Desktop\teletube-new again
+  Restart GitHub Desktop
+
+=== PROBLEM 5: Use teletube-github instead ===
+  Current repository: teletube-github
+  Path: C:\Users\Admin\Desktop\teletube-github
+  Files are already there. Only need Summary + Commit + Push.
+
+=== EASIEST: Upload on website (no Desktop) ===
+  1. github.com > your teletube repo
+  2. Add file > Upload files
+  3. Drag ALL files from teletube-new folder
+  4. Commit changes
+
+Do NOT upload: node_modules, .next, .env
