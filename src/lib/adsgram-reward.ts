@@ -41,8 +41,13 @@ function loadAdsgramScript(): Promise<void> {
   return scriptPromise;
 }
 
-function outcomeFromResult(result: AdsgramShowResult): AdsgramRewardOutcome {
+function outcomeFromResult(
+  result: AdsgramShowResult,
+  resolved: boolean
+): AdsgramRewardOutcome {
   if (result.error) return "no_fill";
+  // Rewarded format: .then() = watched till end (AdsGram docs)
+  if (resolved) return "granted";
   if (result.done) return "granted";
   return "dismissed";
 }
@@ -59,10 +64,10 @@ export async function showAdsgramReward(blockId: string): Promise<AdsgramRewardO
 
   try {
     const result = await controller.show();
-    return outcomeFromResult(result);
+    return outcomeFromResult(result, true);
   } catch (result) {
     if (result && typeof result === "object" && "error" in result) {
-      return outcomeFromResult(result as AdsgramShowResult);
+      return outcomeFromResult(result as AdsgramShowResult, false);
     }
     return "no_fill";
   }

@@ -63,13 +63,13 @@ export function RewardedAdPlayer({
     if (useAdsgram) {
       let cancelled = false;
 
-      loadTimeoutRef.current = window.setTimeout(() => {
-        if (!cancelled) finish(onNoFill);
-      }, LOAD_TIMEOUT_MS);
-
       void showAdsgramReward(adsgramBlockId!)
         .then((outcome) => {
           if (cancelled) return;
+          if (loadTimeoutRef.current != null) {
+            window.clearTimeout(loadTimeoutRef.current);
+            loadTimeoutRef.current = null;
+          }
           if (outcome === "granted") finish(onGranted);
           else if (outcome === "dismissed") finish(onDismissed);
           else finish(onNoFill);

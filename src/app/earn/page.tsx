@@ -101,9 +101,10 @@ export default function EarnPage() {
   };
 
   const handleGranted = useCallback(async () => {
-    if (sessionId == null) return;
+    const sid = sessionId;
+    if (sid == null) return;
+    const ok = await claimReward(sid);
     closePlayer();
-    const ok = await claimReward(sessionId);
     if (!ok) await loadStatus();
   }, [sessionId, closePlayer, claimReward, loadStatus]);
 
