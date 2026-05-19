@@ -4,10 +4,13 @@ import { db, schema } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { getPhoneExportMeta } from "@/lib/phone-export";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     await requireAdmin();
-    const rows = db
+
+    const phones = db
       .select({
         id: schema.users.id,
         username: schema.users.loginUsername,
@@ -23,8 +26,6 @@ export async function GET() {
       .orderBy(asc(schema.users.createdAt))
       .all();
 
-    const phones = rows;
-
     return NextResponse.json({
       phones,
       total: phones.length,
@@ -32,8 +33,26 @@ export async function GET() {
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
-    if (msg === "UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (msg === "FORBIDDEN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+    if (msg === "UNAUTHORIZED") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    if (msg === "FORBIDDEN") {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    console.error(e);
+
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }
