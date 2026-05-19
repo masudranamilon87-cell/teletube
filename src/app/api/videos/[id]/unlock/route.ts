@@ -1,34 +1,105 @@
 import { NextResponse } from "next/server";
-import { getCurrentUser, requireUser } from "@/lib/auth/session";
-import { getVideoForUser, getUserTokenBalance, unlockVideo } from "@/lib/videos";
+
+import { initDatabase } from "@/lib/db";
+
+import {
+  getCurrentUser,
+  requireUser,
+} from "@/lib/auth/session";
+
+import {
+  getVideoForUser,
+  getUserTokenBalance,
+  unlockVideo,
+} from "@/lib/videos";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  {
+    params,
+  }: {
+    params: Promise<{
+      id: string;
+    }>;
+  }
 ) {
   try {
-    const user = await requireUser();
-    const { id } = await params;
-    const videoId = Number(id);
+    initDatabase();
+
+    const user =
+      await requireUser();
+
+    const { id } =
+      await params;
+
+    const videoId =
+      Number(id);
+
     if (!videoId) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Invalid id",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    const result = unlockVideo(user.id, videoId);
+    const result =
+      unlockVideo(
+        user.id,
+        videoId
+      );
+
     if (!result.ok) {
-      return NextResponse.json(result, { status: 400 });
+      return NextResponse.json(
+        result,
+        {
+          status: 400,
+        }
+      );
     }
 
-    const video = getVideoForUser(videoId, user.id);
-    const updatedUser = await getCurrentUser();
+    const video =
+      getVideoForUser(
+        videoId,
+        user.id
+      );
+
+    const updatedUser =
+      await getCurrentUser();
 
     return NextResponse.json({
       success: true,
+
       result,
-      tokenBalance: updatedUser ? getUserTokenBalance(updatedUser) : undefined,
+
+      tokenBalance:
+        updatedUser
+          ? getUserTokenBalance(
+              updatedUser
+            )
+          : undefined,
+
       video,
     });
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } catch (e) {
+    console.error(
+      "[unlock-video]",
+      e
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Unauthorized",
+      },
+      {
+        status: 401,
+      }
+    );
   }
 }
