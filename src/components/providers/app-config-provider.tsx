@@ -12,6 +12,7 @@ import {
 type AppConfigValue = {
   configReady: boolean;
   maintenanceEnabled: boolean;
+  adsgramRewardBlockId: string;
   registrationUiActive: boolean;
   /** No ads during maintenance or registration UI */
   showAds: boolean;
@@ -24,6 +25,7 @@ const AppConfigContext = createContext<AppConfigValue | null>(null);
 export function AppConfigProvider({ children }: { children: React.ReactNode }) {
   const [configReady, setConfigReady] = useState(false);
   const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
+  const [adsgramRewardBlockId, setAdsgramRewardBlockId] = useState("");
   const [registrationUiActive, setRegistrationUiActive] = useState(false);
 
   const refreshConfig = useCallback(async () => {
@@ -32,6 +34,7 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         setMaintenanceEnabled(Boolean(data.maintenanceEnabled));
+        setAdsgramRewardBlockId(String(data.adsgramRewardBlockId || "").trim());
       }
     } catch {
       /* keep last value */
@@ -50,6 +53,7 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
     () => ({
       configReady,
       maintenanceEnabled,
+      adsgramRewardBlockId,
       registrationUiActive,
       showAds,
       setRegistrationUiActive,
@@ -58,6 +62,7 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
     [
       configReady,
       maintenanceEnabled,
+      adsgramRewardBlockId,
       registrationUiActive,
       showAds,
       refreshConfig,

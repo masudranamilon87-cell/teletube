@@ -9,6 +9,7 @@ import { inferFileType, LINK_TYPE_LABELS, type VideoLinkType } from "@/lib/infer
 import { AdminAdsPanel } from "@/components/admin/admin-ads-panel";
 import { AdminPhonesPanel } from "@/components/admin/admin-phones-panel";
 import { AdminSettingsPanel } from "@/components/admin/admin-settings-panel";
+import { AdminUserStats } from "@/components/admin/admin-user-stats";
 import { AdminSmartScreensPanel } from "@/components/admin/admin-smart-screens-panel";
 import { AdminTabBar } from "@/components/admin/admin-tab-bar";
 import { AdminTelegramPostHelp } from "@/components/admin/admin-telegram-post-help";
@@ -216,6 +217,8 @@ export default function AdminPage() {
   return (
     <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden pb-8">
       <h1 className="text-lg font-bold">Admin Panel</h1>
+
+      <AdminUserStats />
 
       <AdminTabBar
         active={tab}

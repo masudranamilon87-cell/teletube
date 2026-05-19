@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { showAdsgramReward } from "@/lib/adsgram-reward";
 import { useRewardedAdBridge } from "@/hooks/use-rewarded-ad-bridge";
 import { mountRewardedAd } from "@/lib/mount-rewarded-ad";
 
@@ -13,6 +14,7 @@ const LOAD_TIMEOUT_MS = Number(
 type Props = {
   sessionId: number;
   open: boolean;
+  adsgramBlockId?: string | null;
   onGranted: () => void;
   onDismissed: () => void;
   onNoFill: () => void;
@@ -22,6 +24,7 @@ type Props = {
 export function RewardedAdPlayer({
   sessionId,
   open,
+  adsgramBlockId,
   onGranted,
   onDismissed,
   onNoFill,
@@ -32,6 +35,7 @@ export function RewardedAdPlayer({
   const [adCode, setAdCode] = useState<string | null>(null);
   const handledRef = useRef(false);
   const loadTimeoutRef = useRef<number | null>(null);
+  const useAdsgram = Boolean(adsgramBlockId?.trim());
 
   const finish = useCallback((fn: () => void) => {
     if (handledRef.current) return;
@@ -44,7 +48,7 @@ export function RewardedAdPlayer({
   }, []);
 
   useRewardedAdBridge({
-    sessionId: open ? sessionId : null,
+    sessionId: open && !useAdsgram ? sessionId : null,
     onGranted: () => finish(onGranted),
     onDismissed: () => finish(onDismissed),
     onNoFill: () => finish(onNoFill),
@@ -55,6 +59,36 @@ export function RewardedAdPlayer({
     handledRef.current = false;
     setLoading(true);
     setAdCode(null);
+
+    if (useAdsgram) {
+      let cancelled = false;
+
+      loadTimeoutRef.current = window.setTimeout(() => {
+        if (!cancelled) finish(onNoFill);
+      }, LOAD_TIMEOUT_MS);
+
+      void showAdsgramReward(adsgramBlockId!)
+        .then((outcome) => {
+          if (cancelled) return;
+          if (outcome === "granted") finish(onGranted);
+          else if (outcome === "dismissed") finish(onDismissed);
+          else finish(onNoFill);
+        })
+        .catch(() => {
+          if (!cancelled) finish(onNoFill);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+
+      return () => {
+        cancelled = true;
+        if (loadTimeoutRef.current != null) {
+          window.clearTimeout(loadTimeoutRef.current);
+          loadTimeoutRef.current = null;
+        }
+      };
+    }
 
     fetch("/api/ads?placement=rewarded_video", { cache: "no-store" })
       .then((r) => r.json())
@@ -68,10 +102,10 @@ export function RewardedAdPlayer({
       })
       .catch(() => finish(onNoFill))
       .finally(() => setLoading(false));
-  }, [open, sessionId, finish, onNoFill]);
+  }, [open, sessionId, finish, onNoFill, useAdsgram, adsgramBlockId, onGranted, onDismissed]);
 
   useEffect(() => {
-    if (!open || !adCode || !containerRef.current) return;
+    if (!open || useAdsgram || !adCode || !containerRef.current) return;
 
     const cleanup = mountRewardedAd(containerRef.current, adCode, sessionId);
 
@@ -86,9 +120,27 @@ export function RewardedAdPlayer({
       }
       cleanup();
     };
-  }, [open, adCode, sessionId, finish, onNoFill]);
+  }, [open, adCode, sessionId, finish, onNoFill, useAdsgram]);
 
   if (!open) return null;
+
+  if (useAdsgram) {
+    return (
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80">
+        <div className="flex flex-col items-center gap-3 text-white/90">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          <p className="text-sm">Loading AdsGram ad…</p>
+          <button
+            type="button"
+            onClick={onUserClose}
+            className="mt-2 rounded-full bg-white/15 px-4 py-2 text-xs text-white"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-black">

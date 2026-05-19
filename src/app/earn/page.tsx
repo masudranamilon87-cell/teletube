@@ -19,7 +19,7 @@ type RewardStatus = {
 export default function EarnPage() {
   const router = useRouter();
   const { ready, authenticated, user, refreshUser } = useTelegram();
-  const { maintenanceEnabled, showAds } = useAppConfig();
+  const { maintenanceEnabled, showAds, adsgramRewardBlockId } = useAppConfig();
   const [status, setStatus] = useState<RewardStatus | null>(null);
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [playerOpen, setPlayerOpen] = useState(false);
@@ -207,6 +207,7 @@ export default function EarnPage() {
         <RewardedAdPlayer
           sessionId={sessionId}
           open={playerOpen}
+          adsgramBlockId={adsgramRewardBlockId}
           onGranted={() => void handleGranted()}
           onDismissed={handleDismissed}
           onNoFill={handleNoFill}

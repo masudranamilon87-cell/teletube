@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
+  getAdsgramRewardBlockId,
   getMaintenanceEnabled,
+  setAdsgramRewardBlockId,
   setMaintenanceEnabled,
 } from "@/lib/app-settings";
 import { requireAdmin } from "@/lib/auth/session";
@@ -13,6 +15,7 @@ export async function GET() {
     await requireAdmin();
     return NextResponse.json({
       maintenanceEnabled: getMaintenanceEnabled(),
+      adsgramRewardBlockId: getAdsgramRewardBlockId(),
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "";
@@ -26,17 +29,30 @@ export async function GET() {
   }
 }
 
-const patchSchema = z.object({
-  maintenanceEnabled: z.boolean(),
-});
+const patchSchema = z
+  .object({
+    maintenanceEnabled: z.boolean().optional(),
+    adsgramRewardBlockId: z.string().max(128).optional(),
+  })
+  .refine((b) => b.maintenanceEnabled !== undefined || b.adsgramRewardBlockId !== undefined, {
+    message: "Nothing to update",
+  });
 
 export async function PATCH(request: Request) {
   try {
     await requireAdmin();
     const body = patchSchema.parse(await request.json());
-    setMaintenanceEnabled(body.maintenanceEnabled);
+
+    if (body.maintenanceEnabled !== undefined) {
+      setMaintenanceEnabled(body.maintenanceEnabled);
+    }
+    if (body.adsgramRewardBlockId !== undefined) {
+      setAdsgramRewardBlockId(body.adsgramRewardBlockId);
+    }
+
     return NextResponse.json({
       maintenanceEnabled: getMaintenanceEnabled(),
+      adsgramRewardBlockId: getAdsgramRewardBlockId(),
     });
   } catch (e) {
     if (e instanceof z.ZodError) {

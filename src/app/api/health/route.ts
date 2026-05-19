@@ -29,9 +29,24 @@ export async function GET() {
     checks.telegramBot = "set";
   }
 
-  const ok = checks.database === "ok";
+  if (!process.env.JWT_SECRET?.trim() && !process.env.TELEGRAM_BOT_TOKEN?.trim()) {
+    checks.sessionSecret = "missing — login/register will fail";
+  } else {
+    checks.sessionSecret = "ok";
+  }
+
+  checks.adminPassword = process.env.ADMIN_PASSWORD?.trim()
+    ? "set"
+    : "missing — Masudadmin login will not work until set + redeploy";
+
+  const ready = checks.database === "ok";
   return NextResponse.json(
-    { ok, checks, hint: "Set Railway Variables; mount Volume on /app/data for SQLite." },
-    { status: ok ? 200 : 503 }
+    {
+      ok: true,
+      ready,
+      checks,
+      hint: "Add Railway Variables and mount Volume on /app/data for persistent SQLite.",
+    },
+    { status: 200 }
   );
 }

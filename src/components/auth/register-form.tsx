@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { COUNTRY_CODES } from "@/lib/country-codes";
+import { useTelegram } from "@/components/providers/telegram-provider";
 
 type Props = {
   onSuccess?: () => void;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function RegisterForm({ onSuccess, onLoginClick, compact }: Props) {
+  const { refreshUser } = useTelegram();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,6 +42,7 @@ export function RegisterForm({ onSuccess, onLoginClick, compact }: Props) {
       return;
     }
 
+    await refreshUser();
     onSuccess?.();
   };
 

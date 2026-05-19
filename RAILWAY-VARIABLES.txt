@@ -1,0 +1,18 @@
+Railway Variables (TeleTube)
+============================
+
+1. Open: teletube/railway-variables.json (local — contains secrets, NOT in GitHub)
+2. Edit REPLACE_* fields (bot username, channel, site URL if different)
+3. Railway → your service → Variables → Raw Editor
+4. Paste the full JSON → Save → Redeploy
+
+Also mount Volume: /app/data
+
+Safe template without secrets: railway-variables.example.json (OK to commit)
+
+After deploy check: https://YOUR-URL.up.railway.app/api/health
+  - adminPassword: set
+  - sessionSecret: ok
+  - database: ok
+
+BotFather Mini App URL = same as NEXT_PUBLIC_SITE_URL (no trailing slash)

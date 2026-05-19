@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getMaintenanceEnabled } from "@/lib/app-settings";
 import { toPublicUser } from "@/lib/auth/accounts";
-import { createSession } from "@/lib/auth/session";
+import { createSession, getSessionSecretError } from "@/lib/auth/session";
 import { registerWithPhone } from "@/lib/auth/phone-register";
 
 const schema = z.object({
@@ -15,6 +15,11 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const secretErr = getSessionSecretError();
+    if (secretErr) {
+      return NextResponse.json({ error: secretErr }, { status: 503 });
+    }
+
     if (getMaintenanceEnabled()) {
       return NextResponse.json(
         { error: "Site is under maintenance. Registration is closed." },
@@ -34,8 +39,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ user: toPublicUser(result.user) });
   } catch (e) {
     if (e instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+      const detail = e.issues.map((i) => i.message).join("; ");
+      return NextResponse.json(
+        { error: `Fill all fields (username, mobile, password x2). ${detail}` },
+        { status: 400 }
+      );
     }
-    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
+    const msg =
+      e instanceof Error && /readonly|SQLITE|ENOENT|EACCES/i.test(e.message)
+        ? "Database not writable — add Railway Volume mounted at /app/data and redeploy."
+        : e instanceof Error
+          ? e.message
+          : "Registration failed";
+    console.error("[auth/register]", e);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

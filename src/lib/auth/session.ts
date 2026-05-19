@@ -5,9 +5,16 @@ import { eq } from "drizzle-orm";
 
 const COOKIE_NAME = "teletube_session";
 
+export function getSessionSecretError(): string | null {
+  if (process.env.JWT_SECRET?.trim() || process.env.TELEGRAM_BOT_TOKEN?.trim()) {
+    return null;
+  }
+  return "Server misconfigured: add JWT_SECRET or TELEGRAM_BOT_TOKEN in Railway Variables, then redeploy.";
+}
+
 function getSecret() {
   const secret = process.env.JWT_SECRET || process.env.TELEGRAM_BOT_TOKEN;
-  if (!secret) throw new Error("JWT_SECRET or TELEGRAM_BOT_TOKEN required");
+  if (!secret) throw new Error(getSessionSecretError() || "JWT_SECRET or TELEGRAM_BOT_TOKEN required");
   return new TextEncoder().encode(secret);
 }
 
