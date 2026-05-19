@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getMaintenanceEnabled } from "@/lib/app-settings";
+import { initDatabase } from "@/lib/db";
 import { loginAccount, toPublicUser } from "@/lib/auth/accounts";
 import { createSession, getSessionSecretError } from "@/lib/auth/session";
 
@@ -11,6 +12,7 @@ const schema = z.object({
 
 export async function POST(request: Request) {
   try {
+    initDatabase();
     const secretErr = getSessionSecretError();
     if (secretErr) {
       return NextResponse.json({ error: secretErr }, { status: 503 });
